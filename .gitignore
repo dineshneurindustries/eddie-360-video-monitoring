@@ -128,3 +128,35 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Node modules for both client and server
+client/node_modules/
+server/node_modules/
+
+# Logs
+client/npm-debug.log*
+server/npm-debug.log*
+client/yarn-debug.log*
+server/yarn-debug.log*
+
+# Build output
+client/build/
+server/dist/
+server/build/
+
+# Cache files
+client/.cache/
+client/.parcel-cache/
+
+# Environment files
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp/
