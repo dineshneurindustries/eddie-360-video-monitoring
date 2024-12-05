@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const config = require('../config/config');
 
 /**
  * Create a user
@@ -11,6 +12,10 @@ const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
+  if (!(await User.isEmailTaken(userBody.email))) {
+    userBody.password = config.hashed_key + userBody.password;
+  }
+
   return User.create(userBody);
 };
 

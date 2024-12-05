@@ -19,6 +19,87 @@ components:
         name: fake name
         role: user
 
+    Module:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        videoId:
+          type: string
+        duration:
+          type: number
+        isActive:
+          type: boolean
+          enum: [true, false]
+        chapters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Chapter'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        id: 5ebac534954b54139806c112
+        title: 'Physics Module'
+        description: 'A comprehensive module covering basic physics principles.'
+        isActive: true
+        videoId: 1
+        duration: 230
+        chapters:
+          - id: 5ebac534954b54139806c112
+            title: 'Introduction to Physics'
+            description: 'An introductory chapter on the basics of physics.'
+            moduleId: 5ebac534954b54139806c112
+            order: 1
+            createdAt: 2024-12-05T08:30:00.000Z
+            updatedAt: 2024-12-05T10:45:00.000Z
+          - id: 5ebac534954b54139806c112
+            title: 'Advanced Physics'
+            description: 'A deeper dive into advanced physics concepts.'
+            moduleId: 5ebac534954b54139806c112
+            order: 2
+            createdAt: 2024-12-05T09:30:00.000Z
+            updatedAt: 2024-12-05T11:45:00.000Z
+        createdAt: 2024-12-05T08:30:00.000Z
+        updatedAt: 2024-12-05T10:45:00.000Z
+
+    Chapter:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        moduleId:
+          type: string
+          description: 'The ID of the module this chapter belongs to'
+        order:
+          type: integer
+          description: 'The order in which the chapter appears in the module'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        id: 5ebac534954b54139806c112
+        title: 'Introduction to Physics'
+        description: 'An introductory chapter on the basics of physics.'
+        moduleId: 5ebac534954b54139806c112
+        order: 1
+        createdAt: 2024-12-05T08:30:00.000Z
+        updatedAt: 2024-12-05T10:45:00.000Z
+
     Token:
       type: object
       properties:
@@ -84,6 +165,15 @@ components:
           example:
             code: 404
             message: Not found
+    BadRequest:
+      description: Bad request, invalid parameters or data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Invalid request parameters or missing data
 
   securitySchemes:
     bearerAuth:

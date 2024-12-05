@@ -8,7 +8,6 @@ const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
     email: {
@@ -33,7 +32,7 @@ const userSchema = mongoose.Schema(
           throw new Error('Password must contain at least one letter and one number');
         }
       },
-      private: true, // used by the toJSON plugin
+      private: true,
     },
     role: {
       type: String,
@@ -43,6 +42,9 @@ const userSchema = mongoose.Schema(
     isEmailVerified: {
       type: Boolean,
       default: false,
+    },
+    languagePreference: {
+      type: String,
     },
   },
   {
