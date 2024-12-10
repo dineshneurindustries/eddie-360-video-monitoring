@@ -100,6 +100,39 @@ components:
         createdAt: 2024-12-05T08:30:00.000Z
         updatedAt: 2024-12-05T10:45:00.000Z
 
+    Assessment:
+      example:
+        id: 5ebac534954b54139806c112
+        options:
+          - isCorrect: false
+            text: Berlin
+          - isCorrect: true
+            text: Paris
+          - isCorrect: false
+            text: Madrid
+          - isCorrect: false
+            text: Rome
+        question: What is the capital of France?
+      properties:
+        id:
+          type: string
+        options:
+          description: The array of options
+          items:
+            properties:
+              isCorrect:
+                description: Indicates if the option is correct
+                type: boolean
+              text:
+                description: The option text
+                type: string
+            type: object
+          type: array
+        question:
+          description: The question text
+          type: string
+      type: object
+
     Token:
       type: object
       properties:
