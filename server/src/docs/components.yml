@@ -133,6 +133,103 @@ components:
           type: string
       type: object
 
+    Session:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: The ID of the user associated with this session
+        sessionTimeAndDate:
+          type: string
+          format: date-time
+          description: The date and time when the session occurred
+        sessionStartedTime:
+          type: string
+          format: date-time
+          description: The date and time when the session started
+        sessionEndedTime:
+          type: string
+          format: date-time
+          description: The date and time when the session ended
+        sessionDuration:
+          type: integer
+          description: Duration of the session in seconds or milliseconds
+        adminId:
+          type: string
+          description: The ID of the admin associated with this session
+        moduleId:
+          type: string
+          description: The ID of the module associated with this session
+        moduleCompletionRate:
+          type: number
+          description: Completion percentage for the module (0-100)
+          default: 0
+        moduleCompletionTimestamp:
+          type: string
+          format: date-time
+          description: Timestamp of module completion
+        questionResponse:
+          type: array
+          items:
+            type: object
+            properties:
+              assessmentId:
+                type: string
+                description: The ID of the associated assessment
+              selectedOption:
+                type: string
+                description: The selected option for the question
+              responseTime:
+                type: integer
+                description: Time taken to answer in seconds
+        assessmentResults:
+          type: object
+          properties:
+            totalScore:
+              type: number
+              description: The total score for the session
+            maxScore:
+              type: number
+              description: The maximum possible score for the session
+            percentageScore:
+              type: number
+              description: The percentage score for the session
+            passFailStatus:
+              type: string
+              enum: ['Pass', 'Fail']
+              description: The pass/fail status of the session
+            totalQuestions:
+              type: number
+              description: The total number of questions in the session
+            correctAnswers:
+              type: number
+              description: The number of correct answers in the session
+            incorrectAnswers:
+              type: number
+              description: The number of incorrect answers in the session
+      example:
+        userId: 5ebac534954b54139806c112
+        sessionTimeAndDate: 2024-12-05T08:30:00.000Z
+        sessionStartedTime: 2024-12-05T08:35:00.000Z
+        sessionEndedTime: 2024-12-05T09:00:00.000Z
+        sessionDuration: 1500
+        adminId: 5ebac534954b54139806c113
+        moduleId: 5ebac534954b54139806c114
+        moduleCompletionRate: 75
+        moduleCompletionTimestamp: 2024-12-05T08:55:00.000Z
+        questionResponse:
+          - assessmentId: 5ebac534954b54139806c115
+            selectedOption: 'Paris'
+            responseTime: 30
+        assessmentResults:
+          totalScore: 80
+          maxScore: 100
+          percentageScore: 80
+          passFailStatus: 'Pass'
+          totalQuestions: 10
+          correctAnswers: 8
+          incorrectAnswers: 2
+
     Token:
       type: object
       properties:

@@ -13,7 +13,7 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   if (!(await User.isEmailTaken(userBody.email))) {
-    userBody.password = config.hashed_key + userBody.password;
+    userBody.password = config.hashed_key + userBody.email;
   }
 
   return User.create(userBody);

@@ -2,21 +2,11 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 
-// Define SessionStatus enum within the same file
-const SessionStatus = {
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
-};
-
 const sessionSchema = mongoose.Schema(
   {
-    sessionId: {
-      type: String,
-      unique: true,
-    },
-    name: {
-      type: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
     sessionTimeAndDate: {
       type: Date,
@@ -40,36 +30,66 @@ const sessionSchema = mongoose.Schema(
         message: 'Invalid sessionEndedTime',
       },
     },
-    grade: {
-      type: String,
-      validate: {
-        validator: (value) => validator.isLength(value, { min: 1 }),
-        message: 'Grade must not be empty',
-      },
-    },
-    sessionStatus: {
-      type: String,
-      enum: Object.values(SessionStatus),
-      default: SessionStatus.PENDING,
+    sessionDuration: {
+      type: Number, // Duration in seconds or milliseconds
     },
     adminId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    feedback: {
-      type: String,
-    },
-    sessionDuration: {
-      type: Number,
-    },
     moduleId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Module',
     },
+    // New Fields
+    moduleCompletionRate: {
+      type: Number, // Completion percentage for the module (0-100)
+      default: 0,
+    },
+    moduleCompletionTimestamp: {
+      type: Date, // Timestamp of module completion
+    },
+    questionResponse: [
+      {
+        assessmentId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Assessment',
+        },
+        selectedOption: {
+          type: String,
+        },
+        responseTime: {
+          type: Number, // Response time in seconds
+        }
+      },
+    ],
+    assessmentResults: {
+      totalScore: {
+        type: Number,
+      },
+      maxScore: {
+        type: Number,
+      },
+      percentageScore: {
+        type: Number,
+      },
+      passFailStatus: {
+        enum: ['Pass', 'Fail'],
+      },
+      totalQuestions: {
+        type: Number,
+      },
+      correctAnswers: {
+        type: Number,
+      },
+      incorrectAnswers: {
+        type: Number,
+      },
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // add plugin that converts mongoose to json
