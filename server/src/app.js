@@ -13,6 +13,7 @@ const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
+const { setupWebSocket } = require('./services/websocketservice.service');
 
 const app = express();
 
@@ -52,6 +53,11 @@ if (config.env === 'production') {
 
 // v1 api routes
 app.use('/v1', routes);
+
+// WebSocket setup
+app.setupWebSocket = (server) => {
+  setupWebSocket(server);
+};
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {

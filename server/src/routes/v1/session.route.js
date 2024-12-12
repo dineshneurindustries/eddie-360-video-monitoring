@@ -22,7 +22,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /sessions:
+ *   /sessions:
  *   post:
  *     summary: Create a new session
  *     description: Creates a new session with associated assessments and user responses.
@@ -35,7 +35,42 @@ module.exports = router;
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Session'
+ *             type: array
+ *             items:
+ *               $ref: '#/components/schemas/Session'
+ *           example:
+ *             - userId: "6759a973797fc8102b5cfa8a"
+ *               sessionTimeAndDate: "2024-12-05T08:30:00.000Z"
+ *               sessionStartedTime: "2024-12-05T08:35:00.000Z"
+ *               sessionEndedTime: "2024-12-05T09:00:00.000Z"
+ *               sessionDuration: 1500
+ *               adminId: "674db721a03283639eb31e09"
+ *               moduleId: "67583ab2543d4157748bf11a"
+ *               moduleCompletionRate: 75
+ *               moduleCompletionTimestamp: "2024-12-05T08:55:00.000Z"
+ *               questionResponse:
+ *                 - assessmentId: "6758503dc74ead8f40639825"
+ *                   selectedOption: "Option 1"
+ *                   responseTime: 30
+ *                 - assessmentId: "6758507b132f2722bdb1e809"
+ *                   selectedOption: "Berlin"
+ *                   responseTime: 30
+ *             - userId: "6759a973797fc8102b5cfa8a"
+ *               sessionTimeAndDate: "2024-12-05T08:30:00.000Z"
+ *               sessionStartedTime: "2024-12-05T08:35:00.000Z"
+ *               sessionEndedTime: "2024-12-05T09:00:00.000Z"
+ *               sessionDuration: 1500
+ *               adminId: "674db721a03283639eb31e09"
+ *               moduleId: "67583ab2543d4157748bf11a"
+ *               moduleCompletionRate: 75
+ *               moduleCompletionTimestamp: "2024-12-05T08:55:00.000Z"
+ *               questionResponse:
+ *                 - assessmentId: "6758503dc74ead8f40639825"
+ *                   selectedOption: "Option 1"
+ *                   responseTime: 30
+ *                 - assessmentId: "6758507b132f2722bdb1e809"
+ *                   selectedOption: "Paris"
+ *                   responseTime: 30
  *     responses:
  *       "201":
  *         description: Created
@@ -44,7 +79,7 @@ module.exports = router;
  *       "401":
  *         $ref: '#/components/responses/Unauthorized'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *       $ref: '#/components/responses/Forbidden'
  *
  *   get:
  *     summary: Get a list of sessions

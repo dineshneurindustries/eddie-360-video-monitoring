@@ -3,6 +3,7 @@ const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 const { userSeeder } = require('./seeders');
+const initWebSocket = require('./services/websocketservice.service'); // WebSocket setup
 
 let server;
 
@@ -22,6 +23,7 @@ mongoose
 
       server = app.listen(config.port, config.host, () => {
         logger.info(`Listening to port ${config.port}`);
+        initWebSocket(server); // Start WebSocket server
       });
     } catch (error) {
       logger.error(`Error during seeding: ${error}`);

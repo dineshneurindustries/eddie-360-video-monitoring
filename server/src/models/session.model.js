@@ -74,6 +74,7 @@ const sessionSchema = mongoose.Schema(
         type: Number,
       },
       passFailStatus: {
+        type: String,
         enum: ['Pass', 'Fail'],
       },
       totalQuestions: {

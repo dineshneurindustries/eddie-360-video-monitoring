@@ -99,56 +99,65 @@ const createSession = async (sessionBody) => {
  * @returns {Promise<QueryResult>}
  */
 const querySessions = async (filter, options, timeRange) => {
-  // Determine date range for filtering
   const currentDate = new Date();
-  let startDate, endDate;
+  let startDate = null, endDate = null;
 
   switch (timeRange) {
     case 'weekly':
       startDate = new Date();
-      startDate.setDate(currentDate.getDate() - 7); // Last 7 days
+      startDate.setDate(currentDate.getDate() - 7);
       break;
 
     case 'monthly':
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1); // Start of the current month
+      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+      endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
       break;
 
     case 'all-time':
-      startDate = null; // No start date filter
+      startDate = null;
+      endDate = null;
       break;
 
     case 'today':
     default:
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()); // Start of today
+      startDate = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate()));
       endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 1); // End of today
+      endDate.setUTCDate(startDate.getUTCDate() + 1);
       break;
   }
 
-  // Add date filters to query
-  if (startDate) {
-    filter.sessionStartedTime = { $gte: startDate };
-  }
-  if (endDate) {
-    filter.sessionStartedTime.$lte = endDate;
+  console.log('Start Date:', startDate);
+  console.log('End Date:', endDate);
+
+  if (startDate || endDate) {
+    const dateQuery = {};
+    if (startDate) dateQuery.$gte = startDate;
+    if (endDate) dateQuery.$lt = endDate;
+
+    console.log('Date Query:', JSON.stringify(dateQuery, null, 2));
+
+    const sessionsInRange = await Session.find({ sessionStartedTime: dateQuery });
+    console.log('Sessions Found:', sessionsInRange.length);
+
+
+    // Apply the date filter to the main query
+    filter.sessionStartedTime = dateQuery;
   }
 
-  // Query sessions with pagination and populate reference fields
-  const sessions = await Session.paginate(filter, {
-    ...options,
-    populate: [
-      { path: 'userId', select: 'name email' }, // Populates userId with name and email fields
-      { path: 'adminId', select: 'name email' }, // Populates adminId with name and email fields
-      { path: 'moduleId', select: 'title description' }, // Populates moduleId with title and description fields
-      {
-        path: 'questionResponse.assessmentId',
-        select: 'title totalMarks' // Populates assessmentId with title and totalMarks fields
-      }
-    ],
-  });
+  // Define populate fields
+  const populateFields = [
+    'userId',
+    'adminId',
+    'moduleId',
+  ];
+
+  options.populate = populateFields.join(',');
+
+  const sessions = await Session.paginate(filter, options);
 
   return sessions;
 };
+
 
 
 /**
