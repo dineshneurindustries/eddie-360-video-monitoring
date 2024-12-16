@@ -126,19 +126,12 @@ const querySessions = async (filter, options, timeRange) => {
       break;
   }
 
-  console.log('Start Date:', startDate);
-  console.log('End Date:', endDate);
-
   if (startDate || endDate) {
     const dateQuery = {};
     if (startDate) dateQuery.$gte = startDate;
     if (endDate) dateQuery.$lt = endDate;
 
-    console.log('Date Query:', JSON.stringify(dateQuery, null, 2));
-
     const sessionsInRange = await Session.find({ sessionStartedTime: dateQuery });
-    console.log('Sessions Found:', sessionsInRange.length);
-
 
     // Apply the date filter to the main query
     filter.sessionStartedTime = dateQuery;

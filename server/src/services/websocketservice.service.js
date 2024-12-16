@@ -1,10 +1,8 @@
-const { Server } = require('socket.io');
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User } = require('../models'); // Assuming you're using a User model to fetch details from DB
 const jwtSecret = require('../config/config');
 
-// Map to keep track of users and their devices
 const userConnections = new Map();
 const adminConnections = new Map();
 
@@ -14,24 +12,23 @@ const initWebSocket = (server) => {
   wss.on('connection', (ws, req) => {
     console.log('New WebSocket connection established');
 
-    // Handle incoming messages
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {  // Use async function here
       try {
         const data = JSON.parse(message);
 
         if (data.token) {
-          // Authenticate the user
           const user = jwt.verify(data.token, jwtSecret.jwt.secret);
           const userId = user.sub;
 
           if (data.role === 'admin') {
-            // Admin connection handling
             adminConnections.set(userId, ws);
             ws.userId = userId;
             ws.role = 'admin';
-            console.log(`Authenticated admin: ${userId}`);
+            const userData = await User.findById(userId).exec();
+            ws.name = userData.name;
+            ws.email = userData.email;
+            ws.send(JSON.stringify({ connectedUsers: Array.from(userConnections.keys()) }));
           } else if (data.role === 'user') {
-            // User connection handling
             if (userConnections.has(userId)) {
               const previousWs = userConnections.get(userId);
               if (previousWs && previousWs.readyState === WebSocket.OPEN) {
@@ -42,35 +39,76 @@ const initWebSocket = (server) => {
             userConnections.set(userId, ws);
             ws.userId = userId;
             ws.role = 'user';
-            console.log(`Authenticated user: ${userId}`);
+
+            try {
+              // Fetch user data from the database
+              const userData = await User.findById(userId).exec(); // Use async/await to handle the promise
+
+              if (userData) {
+                // Send the user details (name and email) to the admin
+                wss.clients.forEach((client) => {
+                  if (client.readyState === WebSocket.OPEN && client.role === 'admin') {
+                    client.send(JSON.stringify({
+                      userId: userId,
+                      name: userData.name,
+                      email: userData.email,
+                    }));
+                  }
+                });
+              }
+            } catch (err) {
+              console.error('Error fetching user data:', err);
+            }
           }
         } else if (data.action) {
-          // Broadcast play/pause actions to all clients except the sender
           const userId = ws.userId;
-          if (!userId) return; // Ignore unauthenticated users
+          if (!userId) return;
 
           if (data.role === 'admin') {
-            // Send play/pause action from admin to user
-            wss.clients.forEach((client) => {
-              if (client !== ws && client.readyState === WebSocket.OPEN && client.role === 'user') {
-                client.send(JSON.stringify({ action: data.action, videoTime: data.videoTime }));
-              }
-            });
-          } else if (data.role === 'user') {
-            // Send play/pause action from user to admin
-            wss.clients.forEach((client) => {
-              if (client !== ws && client.readyState === WebSocket.OPEN && client.role === 'admin') {
-                client.send(JSON.stringify({ action: data.action, videoTime: data.videoTime }));
-              }
-            });
+            // Admin sending control commands to a specific user
+            const targetUserWs = userConnections.get(data.userId);
+            if (targetUserWs && targetUserWs.readyState === WebSocket.OPEN) {
+              targetUserWs.send(JSON.stringify({ action: data.action }));
+
+              // Send the new video time to the admin
+              targetUserWs.send(JSON.stringify({
+                userStatus: data.action,
+                userId: data.userId,
+                videoTime: data.videoTime
+              }));
+
+              // Broadcast updated status to admin
+              wss.clients.forEach((client) => {
+                if (client !== ws && client.readyState === WebSocket.OPEN && client.role === 'admin') {
+                  client.send(JSON.stringify({
+                    action: data.action, userId: data.userId, videoTime: data.videoTime
+                  }));
+                }
+              });
+            }
           }
 
-          // Handle the timer synchronization
-          if (data.timer) {
-            // Send the updated timer value to both the user and admin
+          // Handling user actions (in case needed for logging or other purposes)
+          else if (data.role === 'user') {
+            // Send video time from user to admin
             wss.clients.forEach((client) => {
-              if (client !== ws && client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify({ timer: data.timer }));
+              if (client !== ws && client.readyState === WebSocket.OPEN && client.role === 'admin') {
+                client.send(JSON.stringify({
+                  action: data.action,
+                  userId: userId,
+                  videoTime: data.videoTime
+                }));
+              }
+            });
+
+            // Broadcast updated video time from user to admin
+            wss.clients.forEach((client) => {
+              if (client !== ws && client.readyState === WebSocket.OPEN && client.role === 'admin') {
+                client.send(JSON.stringify({
+                  action: data.action,
+                  userId: userId,
+                  videoTime: data.videoTime
+                }));
               }
             });
           }
@@ -81,7 +119,6 @@ const initWebSocket = (server) => {
       }
     });
 
-    // Handle disconnection
     ws.on('close', () => {
       console.log('WebSocket connection closed');
       if (ws.userId) {
